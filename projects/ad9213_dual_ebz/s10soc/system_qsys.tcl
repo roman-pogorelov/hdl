@@ -1,0 +1,13 @@
+
+set adc_fifo_address_width 8
+
+source $ad_hdl_dir/projects/common/s10soc/s10soc_system_qsys.tcl
+source $ad_hdl_dir/projects/common/intel/adcfifo_qsys.tcl
+source ../common/ad9213_dual_qsys.tcl
+
+	set_interface_property ad9213_adcfifo_if_adc_wovf EXPORT_OF ad9213_adcfifo.if_adc_wovf
+	set_interface_property ad9213_adcfifo_adc_wr EXPORT_OF ad9213_adcfifo.adc_wr
+	set_interface_property axi_ad9213_dual_0_adc_ch_0 EXPORT_OF axi_ad9213_dual_0.adc_ch_0
+	set_interface_property axi_ad9213_dual_0_if_adc_dovf EXPORT_OF axi_ad9213_dual_0.if_adc_dovf
+	set_interface_property axi_ad9213_dual_1_adc_ch_0 EXPORT_OF axi_ad9213_dual_1.adc_ch_0
+	set_interface_property axi_ad9213_dual_1_if_adc_dovf EXPORT_OF axi_ad9213_dual_1.if_adc_dovf
