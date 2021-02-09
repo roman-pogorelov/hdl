@@ -1,10 +1,10 @@
 
 create_clock -period  "10.000 ns"       -name sys_clk_100mhz      [get_ports {sys_clk}]
-create_clock -period  "3.121 ns"        -name ref_a_clk0          [get_ports {rx_ref_a_clk0}]
-create_clock -period  "3.121 ns"        -name ref_a_clk1          [get_ports {rx_ref_a_clk1}]
-create_clock -period  "3.121 ns"        -name ref_b_clk0          [get_ports {rx_ref_b_clk0}]
-create_clock -period  "3.121 ns"        -name ref_b_clk1          [get_ports {rx_ref_b_clk1}]
-create_clock -period  "3.121 ns"        -name device_clk          [get_ports {rx_device_clk_0}]
+create_clock -period  "3.2 ns"        -name ref_a_clk0          [get_ports {rx_ref_a_clk0}]
+create_clock -period  "3.2 ns"        -name ref_a_clk1          [get_ports {rx_ref_a_clk1}]
+create_clock -period  "3.2 ns"        -name ref_b_clk0          [get_ports {rx_ref_b_clk0}]
+create_clock -period  "3.2 ns"        -name ref_b_clk1          [get_ports {rx_ref_b_clk1}]
+create_clock -period  "3.2 ns"        -name device_clk          [get_ports {rx_device_clk_0}]
 
 # Asynchronous GPIOs
 

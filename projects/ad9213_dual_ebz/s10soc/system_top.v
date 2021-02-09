@@ -147,15 +147,16 @@ module system_top (
   output           ad9213_a_rst,
   output           ad9213_b_rst,
 
-  output  [  1:0]  ltc6952_csn,
-  output           ltc6952_sclk,
-  output           ltc6952_sdi,
-  input            ltc6952_0_sdo,
-  input            ltc6952_1_sdo,
+  output           ltc6952_csn,
+  output           ltc6946_csn,
+  output           ltc_sclk,
+  output           ltc_sdi,
+  input            ltc6952_sdo,
+  input            ltc6946_sdo,
 
-  output           adf4371_sclk,
-  inout            adf4371_sdio,
-  output  [  1:0]  adf4371_csn
+  output           adf4377_sclk,
+  inout            adf4377_sdio,
+  output  [  1:0]  adf4377_csn
 
 );
 
@@ -168,25 +169,31 @@ module system_top (
   wire              ninit_done_s;
   wire              h2f_reset_s;
   wire              sys_resetn_s;
-  wire              ltc6952_sdo_s;
-  wire              adf4371_sdi_s;
-  wire              adf4371_sdo_s;
+  wire              ltc_sdo_s;
+  wire              adf4377_sdi_s;
+  wire              adf4377_sdo_s;
   wire    [511:0]   adc_data_0;
   wire    [511:0]   adc_data_1;
+  wire    [511:0]   link_data_0;
+  wire    [511:0]   link_data_1;
+  wire    [1023:0]  adc_data;
   wire              adc_valid;
+  wire    [  1:0]   ltc_csn;
 
   // motherboard-gpio
 
   assign gpio_i[3:0]   = fpga_gpio_dpsw;
   assign gpio_i[7:4]   = fpga_gpio_btn;
-  assign gpio_i[31:11] = gpio_o[31:11];
-  assign fpga_gpio_led = gpio_o[10:8];
+  assign gpio_i[31:8]  = gpio_o[31:8];
+  assign fpga_gpio_led = gpio_o[11:8];
 
   // assignments
 
   assign ad9213_a_rst  = gpio_o[32];
   assign ad9213_b_rst  = gpio_o[33];
-  assign gpio_i[33:32] = gpio_o[33:32];
+  assign gpio_i[63:32] = gpio_o[63:32];
+  assign ltc6952_csn   = ltc_csn[0];
+  assign ltc6946_csn   = ltc_csn[1];
 
   // instantiations
 
@@ -202,21 +209,26 @@ module system_top (
 
   ad_3w_spi #(
     .NUM_OF_SLAVES(2))
-  i_ad_3w_spi_adf4371 (
-    .spi_csn (adf4371_csn),
-    .spi_clk (adf4371_sclk),
-    .spi_mosi (adf4371_sdi_s),
-    .spi_miso (adf4371_sdo_s),
-    .spi_sdio (adf4371_sdio),
+  i_ad_3w_spi_adf4377 (
+    .spi_csn (adf4377_csn),
+    .spi_clk (adf4377_sclk),
+    .spi_mosi (adf4377_sdi_s),
+    .spi_miso (adf4377_sdo_s),
+    .spi_sdio (adf4377_sdio),
     .spi_dir ());
 
-  // SDO line (MISO) switching for the two LTC6952
-  assign ltc6952_sdo_s = (ltc6952_csn == 2'b10) ? ltc6952_0_sdo :
-                         (ltc6952_csn == 2'b01) ? ltc6952_1_sdo : 1'b0;
+  // SDO line (MISO) switching for the two ltc
+  assign ltc_sdo_s = (ltc_csn == 2'b10) ? ltc6952_sdo :
+                     (ltc_csn == 2'b01) ? ltc6946_sdo : 1'b0;
 
   // system reset is a combination of external reset, HPS reset and S10 init
   // done reset
   assign sys_resetn_s = fpga_resetn & ~h2f_reset_s & ~ninit_done_s;
+
+ genvar i;
+ for (i = 0; i < 512; i = i + 16) begin
+    assign adc_data[(2*i)+31:(2*i)] ={adc_data_1[i+15:i],adc_data_0[i+15:i]};
+ end
 
   system_bd i_system_bd (
     .sys_clk_clk                          ( sys_clk ),
@@ -294,42 +306,48 @@ module system_top (
     .sys_hps_ddr_mem_dq                   ( hps_ddr_dq ),
     .sys_hps_ddr_mem_dbi_n                ( hps_ddr_dbi_n ),
     // TEMP
-
-    .ad9213_adcfifo_adc_wr_valid            (adc_valid),
-    .ad9213_adcfifo_adc_wr_data             ({adc_data_1,adc_data_0}),
+    .ad9213_rx_0_link_data_data             (link_data_0),             //  output,   width = 512,         ad9213_rx_0_link_data.data
+    .ad9213_rx_0_link_data_valid            (link_valid_0),            //  output,     width = 1,                              .valid
+    .ad9213_rx_1_link_data_data             (link_data_1),             //  output,   width = 512,         ad9213_rx_1_link_data.data
+    .ad9213_rx_1_link_data_valid            (link_valid_1),            //  output,     width = 1,                              .valid
+    .axi_ad9213_dual_0_link_data_data       ({link_data_1,link_data_0}),       //   input,  width = 1024,   axi_ad9213_dual_0_link_data.data
+    .axi_ad9213_dual_0_link_data_valid      (link_valid_1&link_valid_0),      //   input,     width = 1,                              .valid
+    .axi_ad9213_dual_0_link_data_ready      (),      //  output,     width = 1,                              .ready
+    .util_adcfifo_0_adc_wr_valid            (adc_valid),            //   input,     width = 1,         util_adcfifo_0_adc_wr.valid
+    .util_adcfifo_0_adc_wr_data             (adc_data),              //   input,  width = 1024,                              .data
     .axi_ad9213_dual_0_adc_ch_0_enable      (),
     .axi_ad9213_dual_0_adc_ch_0_valid       (adc_valid),
     .axi_ad9213_dual_0_adc_ch_0_data        (adc_data_0),
-    .axi_ad9213_dual_1_adc_ch_0_enable      (),
-    .axi_ad9213_dual_1_adc_ch_0_valid       (),
-    .axi_ad9213_dual_1_adc_ch_0_data        (adc_data_1),
+    .axi_ad9213_dual_0_adc_ch_1_enable      (),
+    .axi_ad9213_dual_0_adc_ch_1_valid       (),
+    .axi_ad9213_dual_0_adc_ch_1_data        (adc_data_1),
     // SPI interface for the two ad9213
     .sys_spi_MISO                         ( spi_miso_s ),
     .sys_spi_MOSI                         ( spi_mosi_s ),
     .sys_spi_SCLK                         ( ad9213_dual_sclk ),
     .sys_spi_SS_n                         ( ad9213_dual_csn ),
-    // SPI interface for the LTC6952
-    .ltc6952_spi_MISO                     ( ltc6952_sdo_s ),
-    .ltc6952_spi_MOSI                     ( ltc6952_sdi ),
-    .ltc6952_spi_SCLK                     ( ltc6952_sclk ),
-    .ltc6952_spi_SS_n                     ( ltc6952_csn ),
-    // SPI interface for the LTC6952
-    .adf4371_spi_MISO                     ( adf4371_sdo_s ),
-    .adf4371_spi_MOSI                     ( adf4371_sdi_s ),
-    .adf4371_spi_SCLK                     ( adf4371_sclk ),
-    .adf4371_spi_SS_n                     ( adf4371_csn ),
+    // SPI interface for the ltc
+    .ltc_spi_MISO                     ( ltc_sdo_s ),
+    .ltc_spi_MOSI                     ( ltc_sdi ),
+    .ltc_spi_SCLK                     ( ltc_sclk ),
+    .ltc_spi_SS_n                     ( ltc_csn ),
+    // SPI interface for the ADF4377
+    .adf4377_spi_MISO                     ( adf4377_sdo_s ),
+    .adf4377_spi_MOSI                     ( adf4377_sdi_s ),
+    .adf4377_spi_SCLK                     ( adf4377_sclk ),
+    .adf4377_spi_SS_n                     ( adf4377_csn ),
     // JESD204B high-speed interface
-    .rx_ref_clk_0_clk                     ( rx_ref_a_clk0 ),
-    .ad9213_rx_0_serial_data_rx_serial_data( rx_serial_data_a ),
-    .rx_sysref_0_export                   ( rx_sysref_a ),
-    .rx_sync_0_export                     ( rx_sync_a ),
-    .rx_ref_clk_1_clk                     ( rx_ref_b_clk0 ),
-    .ad9213_rx_1_serial_data_rx_serial_data( rx_serial_data_b ),
-    .rx_sysref_1_export                   ( rx_sysref_a ),
-    .rx_sync_1_export                     ( rx_sync_b ),
-    .rx_device_clk_clk                    ( rx_device_clk_0 ),
+    .rx_ref_clk_0_clk                       ( rx_ref_a_clk0 ),
+    .ad9213_rx_0_serial_data_rx_serial_data ( rx_serial_data_a ),
+    .rx_sysref_0_export                     ( rx_sysref_a ),
+    .rx_sync_0_export                       ( rx_sync_a ),
+    .rx_ref_clk_1_clk                       ( rx_ref_b_clk0 ),
+    .ad9213_rx_1_serial_data_rx_serial_data ( rx_serial_data_b ),
+    .rx_sysref_1_export                     ( rx_sysref_a ),
+    .rx_sync_1_export                       ( rx_sync_b ),
+    .rx_device_clk_clk                      ( rx_device_clk_0 ),
     // ad9213_a|b gpio
-    .ad9213_dual_pio_export               ( {ad9213_b_gpio, ad9213_a_gpio} ));
+    .ad9213_dual_pio_export                 ( {ad9213_b_gpio, ad9213_a_gpio} ));
 
 endmodule
 
