@@ -106,13 +106,17 @@ module axi_ltc2387 #(
 
  generate
     if (RESOLUTION == 16) begin
-      assign adc_data = adc_data_int[RESOLUTION-1:0];
+      if (TWOLANES) begin
+        assign adc_data = adc_data_int[RESOLUTION-1:0];
+      end else begin
+        assign adc_data = adc_data_int[RESOLUTION:1];
+      end
     end else begin
       if (RESOLUTION == 18) begin
-        if (!TWOLANES) begin
-          assign adc_data = adc_data_int[RESOLUTION-1:0];
-        end else begin
+        if (TWOLANES) begin
           assign adc_data = adc_data_int[RESOLUTION+1:2];
+        end else begin
+          assign adc_data = adc_data_int[RESOLUTION-1:0];
         end
       end
     end
