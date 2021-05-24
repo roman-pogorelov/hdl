@@ -177,7 +177,13 @@ module system_top (
   wire    [511:0]   link_data_0;
   wire    [511:0]   link_data_1;
   wire    [1023:0]  adc_data;
+  wire              adc_enable_0;
+  wire              adc_enable_1;
   wire              adc_valid;
+  reg               adc_valid_d1;
+  reg     [1023:0]  adc_data_d1;
+  reg     [511:0]   adc_data_0_d1;
+  reg     [511:0]   adc_data_1_d1;
   wire    [  1:0]   ltc_csn;
 
   // motherboard-gpio
@@ -228,6 +234,24 @@ module system_top (
  genvar i;
  for (i = 0; i < 512; i = i + 16) begin
     assign adc_data[(2*i)+31:(2*i)] ={adc_data_1[i+15:i],adc_data_0[i+15:i]};
+ end
+
+ always @(posedge rx_device_clk_0) begin
+   adc_data_0_d1 <= adc_data_0;
+   adc_data_1_d1 <= adc_data_1;
+
+   case ({adc_enable_1,adc_enable_0})
+     2'b01: adc_data_d1 <= {adc_data_0,adc_data_0_d1};
+     2'b10: adc_data_d1 <= {adc_data_1,adc_data_1_d1};
+     2'b11: adc_data_d1 <= adc_data;
+     default: adc_data_d1 <= adc_data_d1;
+   endcase
+   case ({adc_enable_1,adc_enable_0})
+     2'b01: adc_valid_d1 <= ~adc_valid_d1;
+     2'b10: adc_valid_d1 <= ~adc_valid_d1;
+     2'b11: adc_valid_d1<= adc_valid;
+     default: adc_valid_d1 <= adc_valid;
+   endcase
  end
 
   system_bd i_system_bd (
@@ -313,12 +337,12 @@ module system_top (
     .axi_ad9213_dual_0_link_data_data       ({link_data_1,link_data_0}),       //   input,  width = 1024,   axi_ad9213_dual_0_link_data.data
     .axi_ad9213_dual_0_link_data_valid      (link_valid_1&link_valid_0),      //   input,     width = 1,                              .valid
     .axi_ad9213_dual_0_link_data_ready      (),      //  output,     width = 1,                              .ready
-    .util_adcfifo_0_adc_wr_valid            (adc_valid),            //   input,     width = 1,         util_adcfifo_0_adc_wr.valid
-    .util_adcfifo_0_adc_wr_data             (adc_data),              //   input,  width = 1024,                              .data
-    .axi_ad9213_dual_0_adc_ch_0_enable      (),
+    .util_adcfifo_0_adc_wr_valid            (adc_valid_d1),            //   input,     width = 1,         util_adcfifo_0_adc_wr.valid
+    .util_adcfifo_0_adc_wr_data             (adc_data_d1),              //   input,  width = 1024,                              .data
+    .axi_ad9213_dual_0_adc_ch_0_enable      (adc_enable_0),
     .axi_ad9213_dual_0_adc_ch_0_valid       (adc_valid),
     .axi_ad9213_dual_0_adc_ch_0_data        (adc_data_0),
-    .axi_ad9213_dual_0_adc_ch_1_enable      (),
+    .axi_ad9213_dual_0_adc_ch_1_enable      (adc_enable_1),
     .axi_ad9213_dual_0_adc_ch_1_valid       (),
     .axi_ad9213_dual_0_adc_ch_1_data        (adc_data_1),
     // SPI interface for the two ad9213
