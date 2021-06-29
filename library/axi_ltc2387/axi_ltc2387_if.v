@@ -57,7 +57,7 @@ module axi_ltc2387_if #(
 
   // processor interface
 
-  input                   adc_ddr_edgesel,
+  input                    adc_ddr_edgesel,
 
   // adc interface
 
@@ -88,8 +88,6 @@ module axi_ltc2387_if #(
   wire                        da_n_int_s;
   wire                        db_p_int_s;
   wire                        db_n_int_s;
-  wire                        dco_p_int_s;
-  wire                        dco_n_int_s;
   wire                        dco;
   wire               [19:0]   adc_data_int;
 
@@ -140,16 +138,21 @@ module axi_ltc2387_if #(
   end
 
   my_ila i_ila (
-    .clk(clk),
+    .clk(delay_clk),
     .probe0(adc_data),
     .probe1(reg_da_p),
     .probe2(reg_da_n),
     .probe3(reg_db_p),
     .probe4(reg_db_n),
     .probe5(adc_valid),
-    .probe6(da_p_int_s),
-    .probe7(da_n_int_s));
-
+    .probe6(dco),
+    .probe7(da_p_int_s),
+    .probe8(da_n_int_s),
+    .probe9(db_p_int_s),
+    .probe10(db_n_int_s),
+    .probe11(up_dld),
+    .probe12(up_dwdata),
+    .probe13(up_drdata));
 
   // bits rearrangement
 
@@ -183,7 +186,7 @@ module axi_ltc2387_if #(
 
   ad_data_in #(
     .FPGA_TECHNOLOGY (FPGA_TECHNOLOGY),
-    .IODELAY_CTRL (0),
+    .IODELAY_CTRL (1),
     .IODELAY_GROUP (IO_DELAY_GROUP),
     .REFCLK_FREQUENCY (DELAY_REFCLK_FREQUENCY))
   i_rx_da (
@@ -198,11 +201,11 @@ module axi_ltc2387_if #(
     .up_drdata (up_drdata[4:0]),
     .delay_clk (delay_clk),
     .delay_rst (delay_rst),
-    .delay_locked ());
+    .delay_locked (delay_locked));
 
   ad_data_in #(
     .FPGA_TECHNOLOGY (FPGA_TECHNOLOGY),
-    .IODELAY_CTRL (1),
+    .IODELAY_CTRL (0),
     .IODELAY_GROUP (IO_DELAY_GROUP),
     .REFCLK_FREQUENCY (DELAY_REFCLK_FREQUENCY))
   i_rx_db (
@@ -217,7 +220,7 @@ module axi_ltc2387_if #(
     .up_drdata (up_drdata[9:5]),
     .delay_clk (delay_clk),
     .delay_rst (delay_rst),
-    .delay_locked (delay_locked));
+    .delay_locked ());
 
 
   // clock
@@ -225,7 +228,7 @@ module axi_ltc2387_if #(
   ad_data_clk #(
     .SINGLE_ENDED (0))
   i_adc_dco (
-    .rst (1'b0),
+    .rst (delay_rst),
     .locked (),
     .clk_in_p (dco_p),
     .clk_in_n (dco_n),

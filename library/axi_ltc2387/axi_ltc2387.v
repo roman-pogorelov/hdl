@@ -39,6 +39,9 @@ module axi_ltc2387 #(
 
   parameter ID = 0,
   parameter FPGA_TECHNOLOGY = 1,
+  parameter FPGA_FAMILY = 1,
+  parameter SPEED_GRADE = 1,
+  parameter DEV_PACKAGE = 1,
   parameter IO_DELAY_GROUP = "adc_if_delay_group",
   parameter DELAY_REFCLK_FREQUENCY = 200,
   parameter USERPORTS_DISABLE = 0,
@@ -103,9 +106,9 @@ module axi_ltc2387 #(
   wire    [15:0]  adc_data_s;
   wire            adc_or_s;
   wire            adc_ddr_edgesel_s;
-  wire    [ 8:0]  up_dld_s;
-  wire    [44:0]  up_dwdata_s;
-  wire    [44:0]  up_drdata_s;
+  wire    [ 2:0]  up_dld_s;
+  wire    [ 9:0]  up_dwdata_s;
+  wire    [ 9:0]  up_drdata_s;
   wire            delay_locked_s;
   wire            up_status_pn_err_s;
   wire            up_status_pn_oos_s;
@@ -128,6 +131,7 @@ module axi_ltc2387 #(
   // internal signals
 
   wire            adc_rst;
+  wire            adc_clk;
   wire            up_clk;
   wire            up_rstn;
   wire            delay_rst;
@@ -138,6 +142,7 @@ module axi_ltc2387 #(
 
   assign up_clk = s_axi_aclk;
   assign up_rstn = s_axi_aresetn;
+  assign adc_clk = ref_clk;
 
   // processor read interface
 
@@ -159,7 +164,7 @@ module axi_ltc2387 #(
     .FPGA_TECHNOLOGY (FPGA_TECHNOLOGY),
     .IO_DELAY_GROUP (IO_DELAY_GROUP),
     .DELAY_REFCLK_FREQUENCY (DELAY_REFCLK_FREQUENCY),
-    .RESOLUTION (RESOLUTION),
+    .RESOLUTION (ADC_RES),
     .TWOLANES (TWOLANES))
   i_if (
     .clk (ref_clk),
@@ -174,7 +179,7 @@ module axi_ltc2387 #(
     .da_out (da_out),
     .db_out (db_out),
     .adc_ddr_edgesel (adc_ddr_edgesel_s),
-    .adc_valid (adc_data_ch_s),
+    .adc_valid (adc_valid_ch_s),
     .adc_data (adc_data_ch_s),
     .up_clk (up_clk),
     .up_dld (up_dld_s),
@@ -189,7 +194,7 @@ module axi_ltc2387 #(
   axi_ltc2387_channel #(
     .ADC_RES (ADC_RES),
     .OUT_RES (OUT_RES),
-    .TWO_LANES (TWO_LANES),
+    .TWOLANES (TWOLANES),
     .USERPORTS_DISABLE (USERPORTS_DISABLE),
     .DATAFORMAT_DISABLE (DATAFORMAT_DISABLE))
   i_channel (
@@ -259,7 +264,7 @@ module axi_ltc2387 #(
     .adc_r1_mode (),
     .adc_ddr_edgesel (adc_ddr_edgesel_s),
     .adc_pin_mode (),
-    .adc_status (1'b1),
+    .adc_status (delay_locked_s),
     .adc_sync_status (1'd0),
     .adc_status_ovf (adc_dovf),
     .adc_clk_ratio (32'b1),

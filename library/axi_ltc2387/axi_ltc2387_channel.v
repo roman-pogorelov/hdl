@@ -41,7 +41,7 @@ module axi_ltc2387_channel #(
 
   parameter   ADC_RES = 16,
   parameter   OUT_RES = 16,
-  parameter   TWO_LANES = 1,
+  parameter   TWOLANES = 1,
   parameter   USERPORTS_DISABLE = 0,
   parameter   DATAFORMAT_DISABLE = 0) (
 
@@ -57,6 +57,12 @@ module axi_ltc2387_channel #(
   output                  adc_enable,
   output                  adc_valid,
   output    [OUT_RES-1:0] adc_data,
+
+  // error monitoring
+
+  output                  up_adc_pn_err,
+  output                  up_adc_pn_oos,
+  output                  up_adc_or,
 
   // processor interface
 
@@ -96,7 +102,7 @@ module axi_ltc2387_channel #(
   // expected pattern
 
   generate
-    if (TWO_LANES == 1) begin
+    if (TWOLANES == 1) begin
       assign expected_pattern = 16'b1100110000111111;
     end else begin
       assign expected_pattern = 16'b1010000001111111;
@@ -166,7 +172,7 @@ module axi_ltc2387_channel #(
     .adc_iqcor_coeff_1 (adc_iqcor_coeff_1_s),
     .adc_iqcor_coeff_2 (adc_iqcor_coeff_2_s),
     .adc_pnseq_sel (adc_pnseq_sel_s),
-    .adc_data_sel (adc_data_sel_s),
+    .adc_data_sel (),
     .adc_pn_err (adc_pn_err_s),
     .adc_pn_oos (adc_pn_oos_s),
     .adc_or (1'b0),
