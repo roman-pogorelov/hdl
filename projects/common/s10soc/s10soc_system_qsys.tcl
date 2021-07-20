@@ -15,6 +15,7 @@ set_instance_parameter_value sys_clk {clockFrequencyKnown} {1}
 set_instance_parameter_value sys_clk {resetSynchronousEdges} {DEASSERT}
 
 add_instance s10_reset altera_s10_user_rst_clkgate
+#set_component_parameter_value outputType {Conduit Interface}
 add_interface rst_ninit_done reset source
 set_interface_property rst_ninit_done EXPORT_OF s10_reset.ninit_done
 
@@ -112,7 +113,6 @@ set_instance_parameter_value sys_hps {H2F_COLD_RST_Enable} {1}
 set_instance_parameter_value sys_hps {H2F_PENDING_RST_Enable} {1}
 set_instance_parameter_value sys_hps {H2F_USER0_CLK_Enable} {1}
 set_instance_parameter_value sys_hps {H2F_USER0_CLK_FREQ} {100}
-set_instance_parameter_value sys_hps {HPS_BOOT} {1}
 set_instance_parameter_value sys_hps {HPS_IO_Enable} $hps_io_list
 set_instance_parameter_value sys_hps {IO_OUTPUT_DELAY12} {17}
 set_instance_parameter_value sys_hps {L3_MAIN_FREE_CLK} {400}
@@ -247,6 +247,8 @@ proc ad_cpu_interconnect {m_base m_port {avl_bridge ""} {avl_bridge_base 0x00000
       add_instance ${avl_bridge} altera_avalon_mm_bridge
       set_instance_parameter_value ${avl_bridge} {ADDRESS_WIDTH} $avl_address_width
       set_instance_parameter_value ${avl_bridge} {SYNC_RESET} {1}
+      #set_instance_parameter_value ${avl_bridge} {MAX_PENDING_WRITES} {0}
+      #set_instance_parameter_value ${avl_bridge} {USE_WRITERESPONSE} {0}
       add_connection sys_hps.h2f_lw_axi_master ${avl_bridge}.s0
       set_connection_parameter_value sys_hps.h2f_lw_axi_master/${avl_bridge}.s0 baseAddress ${avl_bridge_base}
       add_connection sys_clk.clk ${avl_bridge}.clk

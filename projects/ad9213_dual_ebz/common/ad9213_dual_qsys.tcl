@@ -6,7 +6,7 @@ set adc_dma_data_width 1024
 ## IP instantiations and configuration
 #
 
-add_instance device_clk altera_clock_bridge 19.1
+add_instance device_clk altera_clock_bridge 19.2.0
 set_instance_parameter_value device_clk {EXPLICIT_CLOCK_RATE} {312500000}
 
 # ad9213_rx_0 JESD204B phy-link layer
