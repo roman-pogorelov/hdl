@@ -72,9 +72,9 @@ module axi_ltc2387 #(
 
   // debug
 
-  output                    dco_out,
-  output                    da_out,
-  output                    db_out,
+//  output                    dco_out,
+//  output                    da_out,
+//  output                    db_out,
 
   // axi interface
 
@@ -135,7 +135,8 @@ module axi_ltc2387 #(
   wire            up_clk;
   wire            up_rstn;
   wire            delay_rst;
-  wire            adc_data_ch_s;
+  wire     [OUT_RES-1:0]  adc_data_ch_s;
+//  wire            adc_data_ch_s;
   wire            adc_valid_ch_s;
 
   // signal name changes
@@ -175,9 +176,9 @@ module axi_ltc2387 #(
     .db_n (db_n),
     .dco_p (dco_p),
     .dco_n (dco_n),
-    .dco_out (dco_out),
-    .da_out (da_out),
-    .db_out (db_out),
+//    .dco_out (dco_out),
+//    .da_out (da_out),
+ //   .db_out (db_out),
     .adc_ddr_edgesel (adc_ddr_edgesel_s),
     .adc_valid (adc_valid_ch_s),
     .adc_data (adc_data_ch_s),

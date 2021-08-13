@@ -71,9 +71,9 @@ module axi_ltc2387_if #(
   input                    db_n,
 
   // debug
-  output                   dco_out,
-  output                   da_out,
-  output                   db_out,
+//  output                   dco_out,
+//  output                   da_out,
+//  output                   db_out,
 
   output                   adc_valid,
   output [RESOLUTION-1:0]  adc_data);
@@ -105,10 +105,10 @@ module axi_ltc2387_if #(
   reg      [           1:0]   clk_gate_d = 1'b0;
 
   // debug
-  reg [3:0] reg_da_p = 4'd0;
-  reg [3:0] reg_da_n = 4'd0;
-  reg [3:0] reg_db_p = 4'd0;
-  reg [3:0] reg_db_n = 4'd0;
+  //reg [3:0] reg_da_p = 4'd0;
+  //reg [3:0] reg_da_n = 4'd0;
+  //reg [3:0] reg_db_p = 4'd0;
+  //reg [3:0] reg_db_n = 4'd0;
 
   // assignments
 
@@ -131,28 +131,28 @@ module axi_ltc2387_if #(
     adc_data_db_n <= {adc_data_db_n[WIDTH-2:0], adc_dmux_b_n_s};
 
     // debug
-    reg_da_p <= {reg_da_p[2:0], da_p_int_s};
-    reg_da_n <= {reg_da_n[2:0], da_n_int_s};
-    reg_db_p <= {reg_db_p[2:0], db_p_int_s};
-    reg_db_n <= {reg_db_n[2:0], db_n_int_s};
+   // reg_da_p <= {reg_da_p[2:0], da_p_int_s};
+   // reg_da_n <= {reg_da_n[2:0], da_n_int_s};
+   // reg_db_p <= {reg_db_p[2:0], db_p_int_s};
+   // reg_db_n <= {reg_db_n[2:0], db_n_int_s};
   end
 
-  my_ila i_ila (
-    .clk(delay_clk),
-    .probe0(adc_data),
-    .probe1(reg_da_p),
-    .probe2(reg_da_n),
-    .probe3(reg_db_p),
-    .probe4(reg_db_n),
-    .probe5(adc_valid),
-    .probe6(dco),
-    .probe7(da_p_int_s),
-    .probe8(da_n_int_s),
-    .probe9(db_p_int_s),
-    .probe10(db_n_int_s),
-    .probe11(up_dld),
-    .probe12(up_dwdata),
-    .probe13(up_drdata));
+//  my_ila i_ila (
+//    .clk(delay_clk),
+//    .probe0(adc_data),
+//    .probe1(reg_da_p),
+//    .probe2(reg_da_n),
+//    .probe3(reg_db_p),
+//    .probe4(reg_db_n),
+//    .probe5(adc_valid),
+//    .probe6(dco),
+//    .probe7(da_p_int_s),
+//    .probe8(da_n_int_s),
+//    .probe9(db_p_int_s),
+//    .probe10(db_n_int_s),
+//    .probe11(up_dld),
+//    .probe12(up_dwdata),
+//    .probe13(up_drdata));
 
   // bits rearrangement
 
@@ -190,7 +190,7 @@ module axi_ltc2387_if #(
     .IODELAY_GROUP (IO_DELAY_GROUP),
     .REFCLK_FREQUENCY (DELAY_REFCLK_FREQUENCY))
   i_rx_da (
-    .rx_clk (clk),
+    .rx_clk (dco),
     .rx_data_in_p (da_p),
     .rx_data_in_n (da_n),
     .rx_data_p (da_p_int_s),
@@ -209,7 +209,7 @@ module axi_ltc2387_if #(
     .IODELAY_GROUP (IO_DELAY_GROUP),
     .REFCLK_FREQUENCY (DELAY_REFCLK_FREQUENCY))
   i_rx_db (
-    .rx_clk (clk),
+    .rx_clk (dco),
     .rx_data_in_p (db_p),
     .rx_data_in_n (db_n),
     .rx_data_p (db_p_int_s),
@@ -228,15 +228,15 @@ module axi_ltc2387_if #(
   ad_data_clk #(
     .SINGLE_ENDED (0))
   i_adc_dco (
-    .rst (delay_rst),
+    .rst (1'b0),
     .locked (),
     .clk_in_p (dco_p),
     .clk_in_n (dco_n),
     .clk (dco));
 
   // debug
-  assign  da_out = da_p_int_s;
-  assign  db_out = da_n_int_s;
+//  assign  da_out = da_p_int_s;
+//  assign  db_out = da_n_int_s;
 
 endmodule
 
