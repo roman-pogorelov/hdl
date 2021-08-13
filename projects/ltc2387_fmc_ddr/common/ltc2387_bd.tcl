@@ -11,9 +11,9 @@ create_bd_port -dir I db_p
 create_bd_port -dir I db_n
 create_bd_port -dir O clk_gate
 
-create_bd_port -dir O dco_out
-create_bd_port -dir O da_out
-create_bd_port -dir O db_out
+#create_bd_port -dir O dco_out
+#create_bd_port -dir O da_out
+#create_bd_port -dir O db_out
 
 if {$adc_resolution == 16} {
   set data_width 16
@@ -56,7 +56,7 @@ ad_ip_parameter axi_ltc2387_dma CONFIG.DMA_TYPE_DEST 0
 ad_ip_parameter axi_ltc2387_dma CONFIG.CYCLIC 0
 ad_ip_parameter axi_ltc2387_dma CONFIG.SYNC_TRANSFER_START 0
 ad_ip_parameter axi_ltc2387_dma CONFIG.AXI_SLICE_SRC 0
-ad_ip_parameter axi_ltc2387_dma CONFIG.AXI_SLICE_DEST 1
+ad_ip_parameter axi_ltc2387_dma CONFIG.AXI_SLICE_DEST 0
 ad_ip_parameter axi_ltc2387_dma CONFIG.DMA_2D_TRANSFER 0
 ad_ip_parameter axi_ltc2387_dma CONFIG.DMA_DATA_WIDTH_SRC $data_width
 ad_ip_parameter axi_ltc2387_dma CONFIG.DMA_DATA_WIDTH_DEST 64
@@ -65,16 +65,8 @@ ad_ip_instance axi_clkgen axi_clkgen
 ad_ip_parameter axi_clkgen CONFIG.ID 1
 ad_ip_parameter axi_clkgen CONFIG.CLKIN_PERIOD 10
 ad_ip_parameter axi_clkgen CONFIG.VCO_DIV 1
-ad_ip_parameter axi_clkgen CONFIG.VCO_MUL 6
-ad_ip_parameter axi_clkgen CONFIG.CLK0_DIV 2
-
-ad_ip_instance axi_clkgen axi_clkgen_delay
-ad_ip_parameter axi_clkgen_delay CONFIG.ID 1
-ad_ip_parameter axi_clkgen_delay CONFIG.CLKIN_PERIOD 10
-ad_ip_parameter axi_clkgen_delay CONFIG.VCO_DIV 3
-ad_ip_parameter axi_clkgen_delay CONFIG.VCO_MUL 6
-ad_ip_parameter axi_clkgen_delay CONFIG.CLK0_DIV 1
-
+ad_ip_parameter axi_clkgen CONFIG.VCO_MUL 8.4
+ad_ip_parameter axi_clkgen CONFIG.CLK0_DIV 4
 
 # connections
 
@@ -82,8 +74,7 @@ ad_ip_parameter axi_clkgen_delay CONFIG.CLK0_DIV 1
 ad_connect ref_clk  axi_clkgen/clk
 ad_connect axi_clkgen/clk_0  sampling_clk
 
-ad_connect ref_clk                 axi_clkgen_delay/clk
-ad_connect axi_clkgen_delay/clk_0  axi_ltc2387/delay_clk
+ad_connect sys_200m_clk axi_ltc2387/delay_clk
 
 ad_connect axi_clkgen/clk_0  axi_ltc2387/ref_clk
 ad_connect clk_gate          axi_ltc2387/clk_gate
@@ -94,9 +85,9 @@ ad_connect da_p              axi_ltc2387/da_p
 ad_connect db_n              axi_ltc2387/db_n
 ad_connect db_p              axi_ltc2387/db_p
 
-ad_connect dco_out  axi_ltc2387/dco_out
-ad_connect da_out   axi_ltc2387/da_out
-ad_connect db_out   axi_ltc2387/db_out
+#ad_connect dco_out  axi_ltc2387/dco_out
+#ad_connect da_out   axi_ltc2387/da_out
+#ad_connect db_out   axi_ltc2387/db_out
 
 ad_connect clk_gate   axi_pwm_gen/pwm_1
 ad_connect cnv        axi_pwm_gen/pwm_0
@@ -116,7 +107,6 @@ ad_cpu_interconnect 0x44A00000 axi_ltc2387
 ad_cpu_interconnect 0x44A30000 axi_ltc2387_dma
 ad_cpu_interconnect 0x44A60000 axi_pwm_gen
 ad_cpu_interconnect 0x44A70000 axi_clkgen
-ad_cpu_interconnect 0x44A80000 axi_clkgen_delay
 
 # interconnect (adc)
 

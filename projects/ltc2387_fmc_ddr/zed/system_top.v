@@ -95,19 +95,19 @@ module system_top (
   input                   db_p,
 
   // connected on the adaq board from pmod ja1 and 2
-  output                  test_pat,
-  output                  two_lanes,
+//  output                  test_pat,
+//  output                  two_lanes,
 
   output                  cnv_p,
-  output                  cnv_n,
+  output                  cnv_n);
 
   // debug ports
-  output                  cnv_out,
-  output                  clk_gate_out,
-  output                  s_clk_out,
-  output                  dco_out,
-  output                  da_out,
-  output                  db_out);
+//  output                  cnv_out,
+//  output                  clk_gate_out,
+//  output                  s_clk_out,
+//  output                  dco_out,
+//  output                  da_out,
+//  output                  db_out);
 
 // internal signals
 
@@ -124,6 +124,7 @@ module system_top (
 
   wire            clk_s;
   wire            sampling_clk_s;
+  wire            ltc_clk;
 
 // instantiations
 
@@ -136,48 +137,25 @@ i_ref_clk (
   .clk_in_n (ref_clk_n),
   .clk (clk_s));
 
-ad_data_out #(
-  .FPGA_TECHNOLOGY (1),
-  .IODELAY_ENABLE (0),
-  .IODELAY_CTRL (0),
-  .IODELAY_GROUP (0),
-  .REFCLK_FREQUENCY (200))
-i_tx_clk (
-  .tx_clk (sampling_clk_s),
-  .tx_data_p (clk_gate),
-  .tx_data_n (1'b0),
-  .tx_data_out_p (clk_p),
-  .tx_data_out_n (clk_n));
+  ODDR #(.DDR_CLK_EDGE ("SAME_EDGE")) i_tx_data_oddr (
+    .CE (clk_gate),
+    .R (1'b0),
+    .S (1'b0),
+    .C (sampling_clk_s),
+    .D1 (1'b1),
+    .D2 (1'b0),
+    .Q (ltc_clk));
+
+  OBUFDS i_tx_data_obuf (
+    .I (ltc_clk),
+    .O (clk_p),
+    .OB (clk_n));
 
 OBUFDS OBUFDS_cnv (
   .O(cnv_p),
   .OB(cnv_n),
   .I(cnv));
 
-// debug
-OBUFT OBUFT_clk_test (
-  .O(s_clk_out),
-  .T(0),
-  .I(sampling_clk_s));
-
-OBUFT OBUFT_db_out (
-  .O(db_out),
-  .T(0),
-  .I(db_out_s));
-
-OBUFT OBUFT_da_out (
-  .O(da_out),
-  .T(0),
-  .I(da_out_s));
-
-OBUFT OBUFT_dco_out (
-  .O(dco_out),
-  .T(0),
-  .I(dco_out_s));
-
-assign cnv_out = cnv;
-assign clk_gate_out = clk_gate;
-// end of debug
 
 ad_iobuf #(.DATA_WIDTH(32)) iobuf_gpio_bd (
   .dio_i (gpio_o[31:0]),
@@ -265,13 +243,13 @@ system_wrapper i_system_wrapper (
     .cnv (cnv),
     .clk_gate (clk_gate),
 
-    .test_pat (test_pat),
-    .two_lanes (two_lanes),
+//    .test_pat (test_pat),
+//    .two_lanes (two_lanes),
 
     // debug
-    .dco_out (dco_out_s),
-    .da_out  (da_out_s),
-    .db_out  (db_out_s),
+//    .dco_out (dco_out_s),
+//    .da_out  (da_out_s),
+//    .db_out  (db_out_s),
     // end debug
 
     .spi0_clk_i (1'b0),
