@@ -118,17 +118,11 @@ module axi_ltc2387_if #(
     clk_gate_d <= {clk_gate_d, clk_gate};
   end
 
-
-  assign adc_dmux_a_p_s = (adc_ddr_edgesel == 1'b1) ? da_p_int_s : da_n_int_s;
-  assign adc_dmux_a_n_s = (adc_ddr_edgesel == 1'b1) ? da_n_int_s : da_p_int_s;
-  assign adc_dmux_b_p_s = (adc_ddr_edgesel == 1'b1) ? db_p_int_s : db_n_int_s;
-  assign adc_dmux_b_n_s = (adc_ddr_edgesel == 1'b1) ? db_n_int_s : db_p_int_s;
-
   always @(posedge dco) begin
-    adc_data_da_p <= {adc_data_da_p[WIDTH-2:0], adc_dmux_a_p_s};
-    adc_data_da_n <= {adc_data_da_n[WIDTH-2:0], adc_dmux_a_n_s};
-    adc_data_db_p <= {adc_data_db_p[WIDTH-2:0], adc_dmux_b_p_s};
-    adc_data_db_n <= {adc_data_db_n[WIDTH-2:0], adc_dmux_b_n_s};
+    adc_data_da_p <= {adc_data_da_p[WIDTH-2:0], da_p_int_s};
+    adc_data_da_n <= {adc_data_da_n[WIDTH-2:0], da_n_int_s};
+    adc_data_db_p <= {adc_data_db_p[WIDTH-2:0], db_p_int_s};
+    adc_data_db_n <= {adc_data_db_n[WIDTH-2:0], db_n_int_s};
 
     // debug
    // reg_da_p <= {reg_da_p[2:0], da_p_int_s};
