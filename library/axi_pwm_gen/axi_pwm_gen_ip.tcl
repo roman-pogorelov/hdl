@@ -12,7 +12,6 @@ adi_ip_files axi_pwm_gen [list \
   "$ad_hdl_dir/library/util_cdc/sync_bits.v" \
   "$ad_hdl_dir/library/util_cdc/sync_data.v" \
   "$ad_hdl_dir/library/util_cdc/sync_event.v" \
-  "axi_pwm_gen_tb.v" \
   "axi_pwm_gen_regmap.v" \
   "axi_pwm_gen_1.v" \
   "axi_pwm_gen.v"]
