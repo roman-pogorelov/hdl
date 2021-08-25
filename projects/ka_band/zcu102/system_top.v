@@ -86,11 +86,12 @@ module system_top (
   assign gpio_i[31:13] = gpio_o[31:13];
   assign gpio_i[94:36] = gpio_o[94:36];
 
-  ad_iobuf #(.DATA_WIDTH(4)) i_iobuf (
+  ad_iobuf #(.DATA_WIDTH(5)) i_iobuf (
    .dio_t (gpio_t[35:32]),
    .dio_i (gpio_o[35:32]),
    .dio_o (gpio_i[35:32]),
-   .dio_p ({ ext_reset,            // 35
+   .dio_p ({
+             ext_reset,            // 35
              ext_update,           // 34
              ext_rstb,             // 33
              ext_mute}));          // 32
