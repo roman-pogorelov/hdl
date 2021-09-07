@@ -9,7 +9,7 @@ source $ad_hdl_dir/projects/scripts/adi_board.tcl
 ##    0 - RX
 ##
 
-set ka_band_mode 1
+set ka_band_mode 0
 
 adi_project ka_band_zcu102
 

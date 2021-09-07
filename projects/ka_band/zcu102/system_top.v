@@ -43,9 +43,9 @@ module system_top (
   output                  ext_csb_tile2,
   output                  ext_csb_tile3,
   output                  ext_csb_tile1,
-  output                  sdi,
+  output                  sdo,
   output                  sclk,
-  input                   sdo,
+  input                   sdi,
   inout                   ext_reset,
   inout                   ext_update,
   inout                   ext_rstb,
@@ -86,7 +86,7 @@ module system_top (
   assign gpio_i[31:13] = gpio_o[31:13];
   assign gpio_i[94:36] = gpio_o[94:36];
 
-  ad_iobuf #(.DATA_WIDTH(5)) i_iobuf (
+  ad_iobuf #(.DATA_WIDTH(4)) i_iobuf (
    .dio_t (gpio_t[35:32]),
    .dio_i (gpio_o[35:32]),
    .dio_o (gpio_i[35:32]),
