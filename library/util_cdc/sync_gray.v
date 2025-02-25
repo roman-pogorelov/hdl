@@ -55,8 +55,9 @@ module sync_gray #(
   output [DATA_WIDTH-1:0] out_count);
 
 reg [DATA_WIDTH-1:0] cdc_sync_stage0 = 'h0;
-reg [DATA_WIDTH-1:0] cdc_sync_stage1 = 'h0;
-reg [DATA_WIDTH-1:0] cdc_sync_stage2 = 'h0;
+(* altera_attribute = {"-name ADV_NETLIST_OPT_ALLOWED NEVER_ALLOW; -name SYNCHRONIZER_IDENTIFICATION FORCED_IF_ASYNCHRONOUS; -name DONT_MERGE_REGISTER ON; -name PRESERVE_REGISTER ON"} *) reg [DATA_WIDTH-1:0] cdc_sync_stage1 = 'h0;
+(* altera_attribute = {"-name ADV_NETLIST_OPT_ALLOWED NEVER_ALLOW; -name SYNCHRONIZER_IDENTIFICATION FORCED_IF_ASYNCHRONOUS; -name DONT_MERGE_REGISTER ON; -name PRESERVE_REGISTER ON"} *) reg [DATA_WIDTH-1:0] cdc_sync_stage2 = 'h0;
+(* altera_attribute = {"-name ADV_NETLIST_OPT_ALLOWED NEVER_ALLOW; -name SYNCHRONIZER_IDENTIFICATION FORCED_IF_ASYNCHRONOUS; -name DONT_MERGE_REGISTER ON; -name PRESERVE_REGISTER ON"} *) reg [DATA_WIDTH-1:0] cdc_sync_stage3 = 'h0;
 reg [DATA_WIDTH-1:0] out_count_m = 'h0;
 
 function [DATA_WIDTH-1:0] g2b;
@@ -95,11 +96,13 @@ always @(posedge out_clk) begin
   if (out_resetn == 1'b0) begin
     cdc_sync_stage1 <= 'h00;
     cdc_sync_stage2 <= 'h00;
+    cdc_sync_stage3 <= 'h00;
     out_count_m <= 'h00;
   end else begin
     cdc_sync_stage1 <= cdc_sync_stage0;
     cdc_sync_stage2 <= cdc_sync_stage1;
-    out_count_m <= g2b(cdc_sync_stage2);
+    cdc_sync_stage3 <= cdc_sync_stage2;
+    out_count_m <= g2b(cdc_sync_stage3);
   end
 end
 

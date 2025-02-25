@@ -53,20 +53,23 @@ module sync_bits #(
   input out_clk,
   output [NUM_OF_BITS-1:0] out);
 
-reg [NUM_OF_BITS-1:0] cdc_sync_stage1 = 'h0;
-reg [NUM_OF_BITS-1:0] cdc_sync_stage2 = 'h0;
+(* altera_attribute = {"-name ADV_NETLIST_OPT_ALLOWED NEVER_ALLOW; -name SYNCHRONIZER_IDENTIFICATION FORCED_IF_ASYNCHRONOUS; -name DONT_MERGE_REGISTER ON; -name PRESERVE_REGISTER ON"} *) reg [NUM_OF_BITS-1:0] cdc_sync_stage1 = 'h0;
+(* altera_attribute = {"-name ADV_NETLIST_OPT_ALLOWED NEVER_ALLOW; -name SYNCHRONIZER_IDENTIFICATION FORCED_IF_ASYNCHRONOUS; -name DONT_MERGE_REGISTER ON; -name PRESERVE_REGISTER ON"} *) reg [NUM_OF_BITS-1:0] cdc_sync_stage2 = 'h0;
+(* altera_attribute = {"-name ADV_NETLIST_OPT_ALLOWED NEVER_ALLOW; -name SYNCHRONIZER_IDENTIFICATION FORCED_IF_ASYNCHRONOUS; -name DONT_MERGE_REGISTER ON; -name PRESERVE_REGISTER ON"} *) reg [NUM_OF_BITS-1:0] cdc_sync_stage3 = 'h0;
 
 always @(posedge out_clk)
 begin
   if (out_resetn == 1'b0) begin
     cdc_sync_stage1 <= 'b0;
     cdc_sync_stage2 <= 'b0;
+    cdc_sync_stage3 <= 'b0;
   end else begin
     cdc_sync_stage1 <= in;
     cdc_sync_stage2 <= cdc_sync_stage1;
+    cdc_sync_stage3 <= cdc_sync_stage2;
   end
 end
 
-assign out = ASYNC_CLK ? cdc_sync_stage2 : in;
+assign out = ASYNC_CLK ? cdc_sync_stage3 : in;
 
 endmodule
